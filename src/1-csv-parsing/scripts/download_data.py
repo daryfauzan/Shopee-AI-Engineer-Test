@@ -48,4 +48,8 @@ def download_data(
 
     output_path = data_folder / filename
 
+    if output_path.exists():
+        print(f"Skipping download. Data already exists {output_path}")
+        return output_path
+
     return download_csv(url, output_path)
