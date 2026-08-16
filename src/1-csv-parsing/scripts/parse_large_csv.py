@@ -103,10 +103,10 @@ def process_csv(file_path: str, chunk_size: int = CHUNK_SIZE):
         current, peak = tracemalloc.get_traced_memory()
 
         print(
-            f"Chunk {chunk_number:>3} | "
+            f"|Chunk {chunk_number:>3} | "
             f"Rows: {total_rows:>10,} | "
             f"Current: {current / 1024 / 1024:>8.2f} MB | "
-            f"Peak: {peak / 1024 / 1024:>8.2f} MB"
+            f"Peak: {peak / 1024 / 1024:>8.2f} MB|"
         )
 
     # ------------------------------------------------------
