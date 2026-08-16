@@ -1,36 +1,50 @@
-import io
 import zipfile
 from pathlib import Path
 
-import httpx
+import gdown
 
 
 def download_csv(url: str, output_path: str | Path) -> Path:
     output_path = Path(output_path)
 
-    with httpx.Client(follow_redirects=True, timeout=60.0) as client:
-        response = client.get(url)
-        response.raise_for_status()
+    # Download to a temporary file first so we can determine whether
+    # the downloaded file is a ZIP or a CSV.
+    temp_path = output_path.with_suffix(".download")
 
-    content = response.content
+    try:
+        downloaded_path = gdown.download(
+            url=url,
+            output=str(temp_path),
+            quiet=False,
+        )
 
-    # Check whether the downloaded content is a ZIP
-    if zipfile.is_zipfile(io.BytesIO(content)):
-        with zipfile.ZipFile(io.BytesIO(content)) as z:
-            csv_files = [name for name in z.namelist() if name.lower().endswith(".csv")]
+        if downloaded_path is None:
+            raise RuntimeError(f"Failed to download file from: {url}")
 
-            if not csv_files:
-                raise ValueError("ZIP file does not contain a CSV.")
+        # Check whether the downloaded content is a ZIP
+        if zipfile.is_zipfile(temp_path):
+            with zipfile.ZipFile(temp_path) as z:
+                csv_files = [
+                    name for name in z.namelist() if name.lower().endswith(".csv")
+                ]
 
-            if len(csv_files) > 1:
-                print(f"Multiple CSVs found; using: {csv_files[0]}")
+                if not csv_files:
+                    raise ValueError("ZIP file does not contain a CSV.")
 
-            with z.open(csv_files[0]) as src:
-                output_path.write_bytes(src.read())
+                if len(csv_files) > 1:
+                    print(f"Multiple CSVs found; using: {csv_files[0]}")
 
-    else:
-        # Assume it's already a CSV
-        output_path.write_bytes(content)
+                with z.open(csv_files[0]) as src:
+                    output_path.write_bytes(src.read())
+
+        else:
+            # Assume it's already a CSV
+            temp_path.replace(output_path)
+
+    finally:
+        # Remove temporary file if it still exists
+        if temp_path.exists():
+            temp_path.unlink()
 
     return output_path
 
