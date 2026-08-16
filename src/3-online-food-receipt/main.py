@@ -1,6 +1,4 @@
-def main():
-    print("Hello from 3-online-food-receipt!")
-
+from app.main import main
 
 if __name__ == "__main__":
     main()
