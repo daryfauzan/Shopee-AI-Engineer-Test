@@ -2,7 +2,7 @@ import logging
 from pathlib import Path
 from uuid import uuid4
 
-from langchain_google_genai import ChatGoogleGenerativeAI
+from langchain_openai import ChatOpenAI
 from psycopg_pool import ConnectionPool
 
 logger = logging.getLogger(__name__)
@@ -43,9 +43,11 @@ def init_schema(pool: ConnectionPool) -> None:
     logger.info("Database schema ensured")
 
 
-def build_chat_model(api_key: str, model_name: str) -> ChatGoogleGenerativeAI:
-    """A single multimodal Gemini model, used both for receipt-image extraction and the Q&A agent."""
-    return ChatGoogleGenerativeAI(model=model_name, google_api_key=api_key, temperature=0)
+def build_chat_model(
+    api_key: str, model_name: str, base_url: str | None = None
+) -> ChatOpenAI:
+    """A single multimodal OpenAI-compatible model, used both for receipt-image extraction and the Q&A agent."""
+    return ChatOpenAI(model=model_name, api_key=api_key, base_url=base_url, temperature=0)
 
 
 class LocalReceiptImageStore:

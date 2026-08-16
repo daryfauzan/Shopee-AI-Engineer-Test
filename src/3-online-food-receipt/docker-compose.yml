@@ -20,8 +20,9 @@ services:
     ports:
       - "8501:8501"
     environment:
-      LLM__GOOGLE_API_KEY: ${LLM__GOOGLE_API_KEY}
-      LLM__MODEL_NAME: ${LLM__MODEL_NAME:-gemini-2.5-flash}
+      LLM__OPENAI_API_KEY: ${LLM__OPENAI_API_KEY}
+      LLM__MODEL_NAME: ${LLM__MODEL_NAME:-gpt-4o-mini}
+      LLM__BASE_URL: ${LLM__BASE_URL}
       DATABASE__DSN: postgresql://postgres:postgres@postgres:5432/food_receipt
       DATABASE__MIN_POOL_SIZE: ${DATABASE__MIN_POOL_SIZE:-1}
       DATABASE__MAX_POOL_SIZE: ${DATABASE__MAX_POOL_SIZE:-5}

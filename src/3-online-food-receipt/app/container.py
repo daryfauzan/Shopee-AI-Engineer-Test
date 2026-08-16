@@ -35,8 +35,9 @@ class Container(containers.DeclarativeContainer):
 
     chat_model = providers.Singleton(
         build_chat_model,
-        api_key=config.llm.google_api_key,
+        api_key=config.llm.openai_api_key,
         model_name=config.llm.model_name,
+        base_url=config.llm.base_url,
     )
 
     image_store = providers.Singleton(

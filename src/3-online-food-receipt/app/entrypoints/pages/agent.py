@@ -13,10 +13,14 @@ st.caption(
 if "chat_history" not in st.session_state:
     st.session_state["chat_history"] = []
 
+if st.session_state["chat_history"] and st.button("Clear conversation"):
+    st.session_state["chat_history"] = []
+    st.rerun()
+
 for message in st.session_state["chat_history"]:
     role = "user" if isinstance(message, HumanMessage) else "assistant"
     with st.chat_message(role):
-        st.write(message.content)
+        st.write(message.text)
 
 question = st.chat_input("Ask a question about your receipts")
 if question:
@@ -26,11 +30,11 @@ if question:
 
     container = get_container()
     with st.chat_message("assistant"):
-        with st.spinner("Thinking..."):
-            answer = container.ask_question().execute(
+        answer = st.write_stream(
+            container.ask_question().stream(
                 AskQuestionInput(
                     question=question, history=st.session_state["chat_history"][:-1]
                 )
             )
-        st.write(answer)
+        )
     st.session_state["chat_history"].append(AIMessage(content=answer))

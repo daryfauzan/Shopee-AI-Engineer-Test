@@ -1,3 +1,4 @@
+from collections.abc import Iterator
 from dataclasses import dataclass, field
 from datetime import date
 
@@ -70,6 +71,9 @@ class AskQuestionInput:
     history: list[BaseMessage] = field(default_factory=list)
 
 
+NO_ANSWER = "I couldn't come up with an answer. Please try rephrasing your question."
+
+
 class AskQuestion(UseCaseBase[AskQuestionInput, str]):
     """Answers a natural-language question about the user's receipts via the LangGraph agent."""
 
@@ -81,8 +85,18 @@ class AskQuestion(UseCaseBase[AskQuestionInput, str]):
         result = self._runner.run(state)
 
         for message in reversed(result.messages):
-            if isinstance(message, AIMessage) and message.content:
-                content = message.content
-                return content if isinstance(content, str) else str(content)
+            if isinstance(message, AIMessage) and message.text:
+                return str(message.text)
 
-        return "I couldn't come up with an answer. Please try rephrasing your question."
+        return NO_ANSWER
+
+    def stream(self, data: AskQuestionInput) -> Iterator[str]:
+        """Yields the answer as it's generated, for incremental rendering (e.g. st.write_stream)."""
+        state = State(messages=[*data.history, HumanMessage(content=data.question)])
+        streamed = False
+        for piece in self._runner.stream(state):
+            streamed = True
+            yield piece
+
+        if not streamed:
+            yield NO_ANSWER

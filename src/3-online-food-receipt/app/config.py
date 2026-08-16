@@ -12,8 +12,9 @@ class DatabaseSettings(BaseModel):
 
 
 class LLMSettings(BaseModel):
-    google_api_key: str
-    model_name: str = "gemini-3.5-flash"
+    openai_api_key: str
+    model_name: str = "gpt-4o-mini"
+    base_url: str | None = None
 
 
 class StorageSettings(BaseModel):
